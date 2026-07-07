@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @nissegroup/shared run build && (node packages/hub/scripts/refresh-fallback.mjs || true) && pnpm --filter @nissegroup/hub run build",
+  "outputDirectory": "packages/hub/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

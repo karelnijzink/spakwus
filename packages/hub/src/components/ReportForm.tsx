@@ -94,16 +94,20 @@ export function ReportForm({ defaultSegmentId, onDone }: ReportFormProps) {
   return (
     <div className="space-y-4 rounded-2xl border border-edge bg-paper-raised p-5">
       <div>
-        <p className="text-sm font-medium text-ink">What did you see?</p>
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <p id="report-type-label" className="text-sm font-medium text-ink">
+          What did you see?
+        </p>
+        <div role="radiogroup" aria-labelledby="report-type-label" className="mt-2 grid grid-cols-3 gap-2">
           {TYPES.map((t) => (
             <button
               key={t.type}
               type="button"
+              role="radio"
+              aria-checked={incidentType === t.type}
               onClick={() => setIncidentType(t.type)}
               className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-xs transition ${
                 incidentType === t.type
-                  ? "border-pine bg-open-bg text-ink"
+                  ? "border-pine bg-open-bg font-semibold text-ink"
                   : "border-edge bg-paper text-ink-2 hover:border-ink-3/40"
               }`}
             >
@@ -140,7 +144,13 @@ export function ReportForm({ defaultSegmentId, onDone }: ReportFormProps) {
             onClick={useLocation}
             className="rounded-lg border border-edge bg-paper px-3 py-2 text-sm text-ink-2 hover:border-ink-3/40"
           >
-            {geoState === "locating" ? "Locating…" : "📍 Use my location"}
+            {geoState === "locating" ? (
+              "Locating…"
+            ) : (
+              <>
+                <span aria-hidden>📍</span> Use my location
+              </>
+            )}
           </button>
         </div>
         {geoState === "denied" && (
@@ -168,6 +178,7 @@ export function ReportForm({ defaultSegmentId, onDone }: ReportFormProps) {
         value={contact}
         onChange={(e) => setContact(e.target.value)}
         maxLength={200}
+        aria-label="Contact (optional, never shown publicly)"
         placeholder="Contact (optional, never shown)"
         className="w-full rounded-lg border border-edge bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink-3"
       />

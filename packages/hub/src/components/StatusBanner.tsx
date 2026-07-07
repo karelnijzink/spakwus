@@ -35,7 +35,9 @@ export function StatusBanner({
 }: StatusBannerProps) {
   const style = statusStyle(status);
   const head = HEADLINE[status];
-  const reopening = primaryIncident?.endedAt ?? null;
+  // Guard against an unparseable endedAt so we never render "Invalid Date".
+  const reopeningDate = primaryIncident?.endedAt ? new Date(primaryIncident.endedAt) : null;
+  const reopening = reopeningDate && !Number.isNaN(reopeningDate.getTime()) ? reopeningDate : null;
   const isOverride = source === "override";
 
   return (
@@ -69,7 +71,7 @@ export function StatusBanner({
 
         {reopening && (
           <p className="mt-1 text-sm text-ink-2">
-            Estimated reopening: {new Date(reopening).toLocaleString()}
+            Estimated reopening: {reopening.toLocaleString()}
           </p>
         )}
 

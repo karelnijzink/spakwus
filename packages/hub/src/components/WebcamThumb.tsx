@@ -1,7 +1,7 @@
 // Copyright Nisse Group Ltd
 // SPDX-License-Identifier: LicenseRef-TBD (see LICENSE decision note in README)
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { clockTime, timeAgo } from "../lib/time.js";
 import type { SnapshotWebcam } from "../api/types.js";
 import { CamMark } from "./Decorations.js";
@@ -14,6 +14,9 @@ import { CamMark } from "./Decorations.js";
  */
 export function WebcamThumb({ cam }: { cam: SnapshotWebcam }) {
   const [errored, setErrored] = useState(false);
+  // Clear the error when the image URL changes (e.g. a fresh capture) so a
+  // one-off fetch failure doesn't permanently fall back to the placeholder.
+  useEffect(() => setErrored(false), [cam.url]);
   return (
     <figure className="overflow-hidden rounded-2xl border border-edge bg-paper-raised">
       <div className="relative aspect-video w-full bg-gradient-to-br from-open-bg to-paper-raised">

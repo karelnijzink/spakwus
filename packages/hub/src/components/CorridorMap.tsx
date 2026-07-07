@@ -38,20 +38,20 @@ function escapeHtml(s: string): string {
 }
 
 /** A round incident marker (status-coloured), clickable through to detail. */
-function incidentMarkerEl(color: string): HTMLElement {
+function incidentMarkerEl(color: string, label: string): HTMLElement {
   const el = document.createElement("button");
   el.type = "button";
-  el.setAttribute("aria-label", "Incident");
+  el.setAttribute("aria-label", label);
   el.style.cssText = `width:20px;height:20px;border-radius:9999px;border:2.5px solid ${PAPER};
     box-shadow:0 1px 4px rgba(35,34,30,.45);cursor:pointer;padding:0;background:${color};`;
   return el;
 }
 
 /** A camera marker: a pine pin with a small camera glyph. */
-function camMarkerEl(): HTMLElement {
+function camMarkerEl(label: string): HTMLElement {
   const el = document.createElement("button");
   el.type = "button";
-  el.setAttribute("aria-label", "Webcam");
+  el.setAttribute("aria-label", label);
   el.style.cssText = `display:flex;align-items:center;justify-content:center;width:24px;height:24px;
     border-radius:8px;border:2px solid ${PAPER};box-shadow:0 1px 4px rgba(35,34,30,.4);
     cursor:pointer;padding:0;background:${PINE};`;
@@ -138,7 +138,10 @@ export function CorridorMap({
     for (const incident of incidents) {
       if (!incident.geometry) continue;
       const [lon, lat] = incident.geometry.coordinates;
-      const el = incidentMarkerEl(STATUS_COLOR[incident.status]);
+      const el = incidentMarkerEl(
+        STATUS_COLOR[incident.status],
+        `${kindLabel(incident.kind)} — ${incident.status.toLowerCase()}. Open details.`,
+      );
       el.addEventListener("click", () => navigate(`/incident/${incident.id}`));
       const marker = new maplibregl.Marker({ element: el })
         .setLngLat([lon, lat])
@@ -154,12 +157,12 @@ export function CorridorMap({
     }
 
     for (const cam of cams) {
-      const marker = new maplibregl.Marker({ element: camMarkerEl() })
+      const marker = new maplibregl.Marker({ element: camMarkerEl(`Webcam: ${cam.label}`) })
         .setLngLat(segmentMidpoint(cam.segmentId))
         .setPopup(
           popup(
             `<strong style="font-weight:600">${escapeHtml(cam.label)}</strong>` +
-              `<div style="margin-top:2px;font-size:11px;color:#8b877a">${cam.capturedAt ? "Captured " + escapeHtml(clockTime(cam.capturedAt)) : "Awaiting capture"} · DriveBC</div>`,
+              `<div style="margin-top:2px;font-size:11px;color:#696558">${cam.capturedAt ? "Captured " + escapeHtml(clockTime(cam.capturedAt)) : "Awaiting capture"} · DriveBC</div>`,
           ),
         )
         .addTo(map);

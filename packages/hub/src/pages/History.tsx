@@ -34,13 +34,14 @@ function MonthlyChart({ data }: { data: HistoryStatsResponse["closuresByMonth"] 
   const max = Math.max(1, ...recent.map((d) => d.closures));
   return (
     <div className="rounded-2xl border border-edge bg-paper-raised p-5">
-      <p className="font-display text-lg text-ink">Closures per month</p>
-      <div className="mt-4 flex h-40 items-stretch gap-1">
+      <h2 className="font-display text-lg text-ink">Closures per month</h2>
+      <div className="mt-4 flex h-40 items-stretch gap-1" role="img" aria-label="Bar chart of highway closures per month">
         {recent.map((d) => (
           <div
             key={d.month}
             className="flex h-full flex-1 flex-col justify-end"
             title={`${d.month}: ${d.closures} closures`}
+            aria-label={`${d.month}: ${d.closures} closures`}
           >
             <div
               className="w-full rounded-t bg-closed/80"
@@ -64,7 +65,7 @@ function WorstSegments({ data }: { data: HistoryStatsResponse["worstSegments"] }
   const max = Math.max(1, ...data.map((s) => s.closures));
   return (
     <div className="rounded-2xl border border-edge bg-paper-raised p-5">
-      <p className="font-display text-lg text-ink">Worst segments</p>
+      <h2 className="font-display text-lg text-ink">Worst segments</h2>
       <div className="mt-4 space-y-3">
         {data.map((s) => (
           <div key={s.segmentId}>

@@ -53,7 +53,7 @@ function Report({ report }: { report: HealthReport }) {
     <div className="space-y-6">
       <div className="rounded-2xl border border-edge bg-paper-raised p-5">
         <div className="flex items-center justify-between">
-          <p className="font-display text-lg text-ink">Overall</p>
+          <h2 className="font-display text-lg text-ink">Overall</h2>
           <StatusPill ok={report.ok} label={report.ok ? "Operational" : "Degraded"} />
         </div>
         {!report.workersEnabled && (
@@ -71,7 +71,7 @@ function Report({ report }: { report: HealthReport }) {
       </div>
 
       <div className="rounded-2xl border border-edge bg-paper-raised p-5">
-        <p className="font-display text-lg text-ink">DriveBC / Open511 freshness</p>
+        <h2 className="font-display text-lg text-ink">DriveBC / Open511 freshness</h2>
         <div className="mt-3">
           <Row label="Last successful poll">
             <span className="inline-flex items-center gap-2">
@@ -88,7 +88,7 @@ function Report({ report }: { report: HealthReport }) {
       </div>
 
       <div className="rounded-2xl border border-edge bg-paper-raised p-5">
-        <p className="font-display text-lg text-ink">Workers</p>
+        <h2 className="font-display text-lg text-ink">Workers</h2>
         <div className="mt-3">
           {report.workers.map((w) => (
             <Row key={w.name} label={WORKER_LABELS[w.name] ?? w.name}>
@@ -134,6 +134,11 @@ export function Health() {
             conditions from the static fallback.
           </p>
         </div>
+      )}
+      {isError && data && (
+        <p role="status" className="rounded-xl border border-partial/30 bg-partial-bg px-4 py-2.5 text-sm text-partial">
+          Couldn't refresh just now — showing the last successful check ({timeAgo(data.now)}).
+        </p>
       )}
       {data && <Report report={data} />}
     </div>

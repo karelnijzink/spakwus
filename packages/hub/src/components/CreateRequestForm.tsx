@@ -27,6 +27,7 @@ export function CreateRequestForm({
   const [body, setBody] = useState("");
   const [contactMethod, setContactMethod] = useState<ContactMethod>("in_app");
   const [phone, setPhone] = useState("");
+  const [geoState, setGeoState] = useState<"idle" | "locating" | "denied">("idle");
 
   const mutation = useMutation({
     mutationFn: (payload: CreateRequestRequest) => createRequest(payload),
@@ -38,9 +39,17 @@ export function CreateRequestForm({
   });
 
   const useLocation = () => {
-    navigator.geolocation?.getCurrentPosition(
-      (p) => setGeo({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => {},
+    if (!navigator.geolocation) {
+      setGeoState("denied");
+      return;
+    }
+    setGeoState("locating");
+    navigator.geolocation.getCurrentPosition(
+      (p) => {
+        setGeo({ lat: p.coords.latitude, lng: p.coords.longitude });
+        setGeoState("idle");
+      },
+      () => setGeoState("denied"),
       { timeout: 8000 },
     );
   };
@@ -61,11 +70,13 @@ export function CreateRequestForm({
   return (
     <div className="space-y-4 rounded-2xl border border-community/20 bg-community-bg/50 p-5">
       {/* Two clear verbs (plus a lighter Info option). */}
-      <div className="grid grid-cols-3 gap-2">
+      <div role="radiogroup" aria-label="What kind of post" className="grid grid-cols-3 gap-2">
         {KINDS.map((k) => (
           <button
             key={k}
             type="button"
+            role="radio"
+            aria-checked={kind === k}
             onClick={() => setKind(k)}
             className={`rounded-xl border px-2 py-3 text-sm font-semibold transition ${
               kind === k ? "border-community bg-white text-community" : "border-community/20 bg-white/60 text-ink-2"
@@ -77,18 +88,24 @@ export function CreateRequestForm({
       </div>
 
       <div>
-        <p className="text-sm font-medium text-ink">Category</p>
-        <div className="mt-2 flex flex-wrap gap-2">
+        <p id="req-category-label" className="text-sm font-medium text-ink">
+          Category
+        </p>
+        <div role="radiogroup" aria-labelledby="req-category-label" className="mt-2 flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
             <button
               key={c.value}
               type="button"
+              role="radio"
+              aria-checked={category === c.value}
               onClick={() => setCategory(c.value)}
               className={`rounded-full border px-3 py-1.5 text-xs transition ${
-                category === c.value ? "border-community bg-white text-community" : "border-community/20 bg-white/60 text-ink-2"
+                category === c.value
+                  ? "border-community bg-white font-semibold text-community"
+                  : "border-community/20 bg-white/60 text-ink-2"
               }`}
             >
-              {c.glyph} {c.label}
+              <span aria-hidden>{c.glyph}</span> {c.label}
             </button>
           ))}
         </div>
@@ -124,9 +141,18 @@ export function CreateRequestForm({
             onClick={useLocation}
             className="rounded-lg border border-community/20 bg-white px-3 py-2 text-sm text-ink-2"
           >
-            📍 Use my location
+            {geoState === "locating" ? (
+              "Locating…"
+            ) : (
+              <>
+                <span aria-hidden>📍</span> Use my location
+              </>
+            )}
           </button>
         </div>
+        {geoState === "denied" && (
+          <p className="mt-1 text-xs text-ink-3">Location unavailable — pick a segment above.</p>
+        )}
       </div>
 
       <textarea
@@ -139,15 +165,21 @@ export function CreateRequestForm({
       />
 
       <div>
-        <p className="text-sm font-medium text-ink">How should people reach you?</p>
-        <div className="mt-2 flex gap-2">
+        <p id="req-contact-label" className="text-sm font-medium text-ink">
+          How should people reach you?
+        </p>
+        <div role="radiogroup" aria-labelledby="req-contact-label" className="mt-2 flex gap-2">
           {(["in_app", "phone", "none"] as ContactMethod[]).map((m) => (
             <button
               key={m}
               type="button"
+              role="radio"
+              aria-checked={contactMethod === m}
               onClick={() => setContactMethod(m)}
               className={`rounded-lg border px-3 py-1.5 text-xs transition ${
-                contactMethod === m ? "border-community bg-white text-community" : "border-community/20 bg-white/60 text-ink-2"
+                contactMethod === m
+                  ? "border-community bg-white font-semibold text-community"
+                  : "border-community/20 bg-white/60 text-ink-2"
               }`}
             >
               {m === "in_app" ? "In-app thread" : m === "phone" ? "Phone" : "No contact"}
@@ -160,6 +192,7 @@ export function CreateRequestForm({
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              aria-label="Phone number (shown publicly on the board)"
               placeholder="Phone number"
               className="w-full rounded-lg border border-community/20 bg-white px-3 py-2 text-sm text-ink"
             />

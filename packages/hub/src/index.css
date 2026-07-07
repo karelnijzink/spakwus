@@ -15,7 +15,9 @@
   --edge: #e4ddce;
   --ink: #23221e;
   --ink-2: #56534a;
-  --ink-3: #8b877a;
+  /* Darkened from #8b877a so small meta/timestamp text clears WCAG AA (4.5:1)
+     on paper, paper-raised, and the partial/closed/community tinted surfaces. */
+  --ink-3: #696558;
 
   /* Brand accent is overwritten at runtime from @nissegroup/shared brand.colors.primary. */
   --brand-primary: #2e4a38;
@@ -37,12 +39,51 @@ body,
   height: 100%;
 }
 
+html {
+  /* Stop iOS from bumping font sizes in landscape, and kill the grey tap flash. */
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Use the small/large dynamic viewport unit where supported so full-height
+   layouts aren't trapped under Safari's collapsing toolbar. */
+@supports (height: 100dvh) {
+  html,
+  body,
+  #root {
+    height: 100dvh;
+  }
+}
+
 body {
   background-color: var(--paper);
   color: var(--ink-2);
   font-family: "Inter Variable", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Form controls at >=16px so iOS Safari never auto-zooms on focus. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* Safe-area helpers for the notch / home indicator (viewport-fit=cover is on). */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.min-h-dvh {
+  min-height: 100vh;
+}
+@supports (min-height: 100dvh) {
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
 }
 
 h1,

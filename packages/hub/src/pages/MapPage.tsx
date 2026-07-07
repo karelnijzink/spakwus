@@ -1,7 +1,7 @@
 // Copyright Nisse Group Ltd
 // SPDX-License-Identifier: LicenseRef-TBD (see LICENSE decision note in README)
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { useCorridorData } from "../offline/CorridorContext.js";
 import { useIncidents } from "../api/queries.js";
 import { DriveBcLink } from "../components/DriveBcLink.js";
@@ -14,8 +14,11 @@ const CorridorMap = lazy(() =>
 
 export function MapPage() {
   const { snapshot } = useCorridorData();
-  const incidents = useIncidents(true).data?.incidents ?? [];
-  const cams = snapshot?.webcams ?? [];
+  const incidentsData = useIncidents(true).data?.incidents;
+  // Stable refs so CorridorMap only rebuilds its markers when the data changes,
+  // not on every render (empty-fallback arrays would otherwise churn).
+  const incidents = useMemo(() => incidentsData ?? [], [incidentsData]);
+  const cams = useMemo(() => snapshot?.webcams ?? [], [snapshot?.webcams]);
 
   return (
     <div className="space-y-3">

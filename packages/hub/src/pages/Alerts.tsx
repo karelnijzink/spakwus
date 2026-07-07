@@ -1,7 +1,7 @@
 // Copyright Nisse Group Ltd
 // SPDX-License-Identifier: LicenseRef-TBD (see LICENSE decision note in README)
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { SEGMENTS, type SegmentId } from "@nissegroup/shared";
@@ -25,9 +25,17 @@ export function Alerts() {
   const [quietHours, setQuietHours] = useState(false);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [subs, setSubs] = useState<LocalSub[]>(loadLocalSubs());
+  // Lazy initialiser so localStorage is read once, not on every render.
+  const [subs, setSubs] = useState<LocalSub[]>(() => loadLocalSubs());
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+
+  // Bring the confirmation/error into view — the subscribe buttons sit far down
+  // the page, so a message at the top would otherwise be missed on a phone.
+  useEffect(() => {
+    if (notice || error) feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [notice, error]);
 
   const channels = cfg.data?.channels ?? [];
   const has = (c: NotifChannel) => channels.includes(c);
@@ -90,25 +98,41 @@ export function Alerts() {
           Email confirmed — you're all set.
         </p>
       )}
-      {notice && <p className="rounded-xl border border-open/30 bg-open-bg/60 px-4 py-3 text-sm text-open">{notice}</p>}
-      {error && <p className="rounded-xl border border-closed/30 bg-closed-bg/60 px-4 py-3 text-sm text-closed">{error}</p>}
+      <div ref={feedbackRef} aria-live="polite">
+        {notice && (
+          <p role="status" className="rounded-xl border border-open/30 bg-open-bg/60 px-4 py-3 text-sm text-open">
+            {notice}
+          </p>
+        )}
+        {error && (
+          <p role="alert" className="rounded-xl border border-closed/30 bg-closed-bg/60 px-4 py-3 text-sm text-closed">
+            {error}
+          </p>
+        )}
+      </div>
 
       {/* Scope / direction / quiet hours. */}
       <div className="space-y-4 rounded-2xl border border-edge bg-paper-raised p-5">
         <div>
-          <p className="text-sm font-medium text-ink">What do you want alerts for?</p>
-          <div className="mt-2 flex gap-2">
+          <p id="alert-scope-label" className="text-sm font-medium text-ink">
+            What do you want alerts for?
+          </p>
+          <div role="radiogroup" aria-labelledby="alert-scope-label" className="mt-2 flex gap-2">
             <button
               type="button"
+              role="radio"
+              aria-checked={scope === "corridor"}
               onClick={() => setScope("corridor")}
-              className={`rounded-lg border px-3 py-1.5 text-sm ${scope === "corridor" ? "border-pine bg-open-bg text-ink" : "border-edge text-ink-2"}`}
+              className={`rounded-lg border px-3 py-1.5 text-sm ${scope === "corridor" ? "border-pine bg-open-bg font-semibold text-ink" : "border-edge text-ink-2"}`}
             >
               Whole corridor
             </button>
             <button
               type="button"
+              role="radio"
+              aria-checked={scope === "segment"}
               onClick={() => setScope("segment")}
-              className={`rounded-lg border px-3 py-1.5 text-sm ${scope === "segment" ? "border-pine bg-open-bg text-ink" : "border-edge text-ink-2"}`}
+              className={`rounded-lg border px-3 py-1.5 text-sm ${scope === "segment" ? "border-pine bg-open-bg font-semibold text-ink" : "border-edge text-ink-2"}`}
             >
               A segment
             </button>
@@ -129,14 +153,18 @@ export function Alerts() {
         </div>
 
         <div>
-          <p className="text-sm font-medium text-ink">Direction</p>
-          <div className="mt-2 flex gap-2">
+          <p id="alert-direction-label" className="text-sm font-medium text-ink">
+            Direction
+          </p>
+          <div role="radiogroup" aria-labelledby="alert-direction-label" className="mt-2 flex gap-2">
             {(["both", "north", "south"] as SubDirection[]).map((d) => (
               <button
                 key={d}
                 type="button"
+                role="radio"
+                aria-checked={direction === d}
                 onClick={() => setDirection(d)}
-                className={`rounded-lg border px-3 py-1.5 text-sm capitalize ${direction === d ? "border-pine bg-open-bg text-ink" : "border-edge text-ink-2"}`}
+                className={`rounded-lg border px-3 py-1.5 text-sm capitalize ${direction === d ? "border-pine bg-open-bg font-semibold text-ink" : "border-edge text-ink-2"}`}
               >
                 {d === "both" ? "Both ways" : `${d}bound`}
               </button>
@@ -190,6 +218,7 @@ export function Alerts() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                aria-label="Email address for alerts"
                 placeholder="you@example.com"
                 className="flex-1 rounded-lg border border-edge bg-paper px-3 py-2 text-sm text-ink"
               />
@@ -234,6 +263,7 @@ export function Alerts() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                aria-label="Mobile number for SMS alerts"
                 placeholder="+1 604 555 0100"
                 className="flex-1 rounded-lg border border-edge bg-paper px-3 py-2 text-sm text-ink"
               />

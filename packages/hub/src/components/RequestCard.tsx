@@ -40,7 +40,7 @@ export function RequestCard({ request }: { request: CommunityRequestItem }) {
             {KIND_LABEL[request.kind]}
           </span>
           <span className="text-xs text-ink-2">
-            {categoryGlyph(request.category)} {categoryLabel(request.category)}
+            <span aria-hidden>{categoryGlyph(request.category)}</span> {categoryLabel(request.category)}
           </span>
         </div>
         <span className="text-[11px] text-ink-3">{timeAgo(request.createdAt)}</span>
@@ -80,6 +80,7 @@ export function RequestCard({ request }: { request: CommunityRequestItem }) {
           value={reply}
           onChange={(e) => setReply(e.target.value)}
           maxLength={300}
+          aria-label="Reply to this request"
           placeholder="Offer help, info, or eyes on it…"
           className="flex-1 rounded-lg border border-edge bg-paper px-3 py-1.5 text-sm text-ink placeholder:text-ink-3"
         />
@@ -89,9 +90,14 @@ export function RequestCard({ request }: { request: CommunityRequestItem }) {
           onClick={() => respond.mutate()}
           className="rounded-lg bg-community px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
         >
-          Reply
+          {respond.isPending ? "…" : "Reply"}
         </button>
       </div>
+      {(respond.isError || mark.isError || flagReq.isError || flagResp.isError) && (
+        <p role="alert" className="mt-2 text-xs text-closed">
+          That didn't go through — check your connection and try again.
+        </p>
+      )}
 
       <div className="mt-2 flex items-center justify-between">
         <button type="button" onClick={() => flagReq.mutate()} className="text-[11px] text-ink-3 hover:text-closed">

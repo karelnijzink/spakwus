@@ -56,6 +56,7 @@ export function Community() {
             <button
               key={k}
               type="button"
+              aria-pressed={kindFilter === k}
               onClick={() => setKindFilter(k)}
               className={`rounded-full px-3 py-1 text-xs transition ${
                 kindFilter === k ? "bg-community text-white" : "bg-community-bg text-community"
@@ -77,9 +78,10 @@ export function Community() {
       <div className="flex flex-wrap gap-1.5">
         <button
           type="button"
+          aria-pressed={categoryFilter === "all"}
           onClick={() => setCategoryFilter("all")}
           className={`rounded-full px-2.5 py-1 text-[11px] transition ${
-            categoryFilter === "all" ? "bg-community/15 text-community" : "text-ink-3"
+            categoryFilter === "all" ? "bg-community/15 font-semibold text-community" : "text-ink-3"
           }`}
         >
           All categories
@@ -88,12 +90,13 @@ export function Community() {
           <button
             key={c.value}
             type="button"
+            aria-pressed={categoryFilter === c.value}
             onClick={() => setCategoryFilter(c.value)}
             className={`rounded-full px-2.5 py-1 text-[11px] transition ${
-              categoryFilter === c.value ? "bg-community/15 text-community" : "text-ink-3"
+              categoryFilter === c.value ? "bg-community/15 font-semibold text-community" : "text-ink-3"
             }`}
           >
-            {c.glyph} {c.label}
+            <span aria-hidden>{c.glyph}</span> {c.label}
           </button>
         ))}
       </div>
@@ -102,11 +105,17 @@ export function Community() {
         <CreateRequestForm defaultSegmentId={segmentId} onDone={() => setCreating(false)} />
       )}
 
-      {requests.length === 0 ? (
+      {query.isLoading ? (
+        <p className="rounded-2xl border border-edge bg-paper-raised p-6 text-center text-sm text-ink-3">
+          Loading the board…
+        </p>
+      ) : requests.length === 0 ? (
         <p className="rounded-2xl border border-edge bg-paper-raised p-6 text-center text-sm text-ink-3">
           {query.isError
             ? "The community board is unavailable right now."
-            : "No open requests here yet. Be the first to post a need or an offer."}
+            : all.length > 0
+              ? "Nothing matches these filters."
+              : "No open requests here yet. Be the first to post a need or an offer."}
         </p>
       ) : (
         <div className="space-y-3">

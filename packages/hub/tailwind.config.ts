@@ -24,7 +24,7 @@ const config: Config = {
         ink: {
           DEFAULT: "#23221e",
           2: "#56534a",
-          3: "#8b877a",
+          3: "#696558", // AA-contrast meta text (was #8b877a, ~3:1)
         },
         // Brand accent from the shared config (see brandTheme.ts).
         pine: "var(--brand-primary)",

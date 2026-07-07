@@ -87,7 +87,7 @@ function Header() {
   const status = snapshot?.corridor.status;
   const dot = status ? statusStyle(status).dot : "bg-ink-3";
   return (
-    <header className="sticky top-0 z-20 border-b border-edge bg-paper/90 backdrop-blur">
+    <header className="pt-safe sticky top-0 z-20 border-b border-edge bg-paper/90 backdrop-blur">
       <div className="mx-auto flex max-w-app items-center justify-between gap-6 px-4 py-3.5">
         <Wordmark />
 
@@ -162,7 +162,7 @@ function BottomNav() {
       isActive ? "text-pine" : "text-ink-3"
     }`;
   return (
-    <nav className="sticky bottom-0 z-20 border-t border-edge bg-paper-raised md:hidden">
+    <nav className="pb-safe sticky bottom-0 z-20 border-t border-edge bg-paper-raised md:hidden">
       <div className="mx-auto flex max-w-content">
         {NAV.map((item) => (
           <NavLink key={item.to} to={item.to} end={item.end} className={linkClass}>
@@ -178,7 +178,7 @@ function BottomNav() {
 export function Layout() {
   const { mode, generatedAt, confirmedAt } = useCorridorData();
   return (
-    <div className="paper-grain flex min-h-full flex-col">
+    <div className="paper-grain flex min-h-dvh flex-col">
       <Header />
       {mode === "degraded" && <DegradedBanner confirmedAt={confirmedAt} />}
       {mode === "offline" && <OfflineBanner generatedAt={generatedAt} />}

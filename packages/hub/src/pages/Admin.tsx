@@ -170,7 +170,11 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
                 onVerify={() => verify.mutate(r.id)}
                 onDismiss={() => dismiss.mutate(r.id)}
                 onMerge={(target) => merge.mutate({ ids: [r.id], target })}
-                busy={verify.isPending || dismiss.isPending || merge.isPending}
+                busy={
+                  (verify.isPending && verify.variables === r.id) ||
+                  (dismiss.isPending && dismiss.variables === r.id) ||
+                  (merge.isPending && merge.variables?.ids[0] === r.id)
+                }
               />
             ))}
           </div>

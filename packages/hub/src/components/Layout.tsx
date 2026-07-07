@@ -9,7 +9,6 @@ import { statusStyle } from "../lib/status.js";
 import { HAS_BACKEND, HAS_COMMUNITY } from "../lib/features.js";
 import { Logo } from "./Logo.js";
 import { OfflineBanner } from "./OfflineBanner.js";
-import { DegradedBanner } from "./DegradedBanner.js";
 import { ResurfacePrompt } from "./ResurfacePrompt.js";
 
 function NavIcon({ children }: { children: ReactNode }) {
@@ -171,11 +170,13 @@ function BottomNav() {
 }
 
 export function Layout() {
-  const { mode, generatedAt, confirmedAt } = useCorridorData();
+  const { mode, generatedAt } = useCorridorData();
   return (
     <div className="paper-grain flex min-h-dvh flex-col">
       <Header />
-      {mode === "degraded" && <DegradedBanner confirmedAt={confirmedAt} />}
+      {/* No "service degraded" banner: when the live feed blips we quietly serve
+          the recent server-refreshed snapshot; the status card's "Updated X ago"
+          already shows freshness. Only a true offline (device-cache) state notes it. */}
       {mode === "offline" && <OfflineBanner generatedAt={generatedAt} />}
       <main className="mx-auto w-full max-w-app flex-1 px-4 py-5 md:py-8">
         <Outlet />

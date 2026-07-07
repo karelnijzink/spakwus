@@ -38,28 +38,10 @@ export function About() {
       <div className="space-y-2">
         <Heading>The name</Heading>
         <p className="text-sm leading-relaxed text-ink-2">
-          Spakwus is the Sḵwx̱wú7mesh (Squamish) word for eagle, from the language of the
-          Nation whose territory the Sea to Sky corridor and Howe Sound have belonged to
-          since time immemorial. We chose it because the eagle is exactly what this project
-          is: a watcher from above, keeping an eye on the corridor and looking out for the
-          people traveling through it.
-        </p>
-        <p className="text-sm leading-relaxed text-ink-2">
-          The name is rooted in this specific place. This stretch of coast, especially
-          Brackendale, is world famous for its gathering eagles, and the eagle is a being the
-          Squamish Nation uses to represent itself — from the Spakwus Slolem (Eagle Song
-          Dancers) to the naming of community institutions. It is local, it is alive, and it
-          carries the idea of protection and sharp sight that sits at the heart of what we are
-          building.
-        </p>
-        <p className="text-sm leading-relaxed text-ink-2">
-          Spakwus was created to solve a real problem. Today, when the Sea to Sky Highway
-          closes after a crash or a slide, the fastest reliable information comes from a
-          volunteer Facebook group, and the people best placed to report an incident are often
-          stuck in cell dead zones with no way to get the word out. Spakwus is a community-run
-          network of nodes and a live conditions hub that gets accurate information moving
-          quickly, so drivers know before they commit to the road, and so no one is left
-          sitting in the dark waiting to find out what happened ahead.
+          Spakwus is the Sḵwx̱wú7mesh (Squamish) word for eagle — a watcher from above, which
+          is exactly what this is: an eye on the corridor, looking out for the people
+          traveling it. It's a local name — Brackendale's gathering eagles are world-famous,
+          and the eagle is a being the Squamish Nation uses to represent itself.
         </p>
       </div>
 
@@ -78,19 +60,10 @@ export function About() {
       <div className="space-y-2">
         <Heading>How status is decided</Heading>
         <p className="text-sm leading-relaxed text-ink-2">
-          Corridor and segment status is computed live in your browser from DriveBC's
-          official Open511 event feed, using a deterministic rule set. Construction and
-          maintenance advisories are shown but don't restrict the corridor — only genuine
-          lane control (single-lane / alternating traffic) and full closures do.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Heading>Offline use</Heading>
-        <p className="text-sm leading-relaxed text-ink-2">
-          {brand.productName} saves the latest conditions to your device so you can open it
-          after losing signal in the corridor. Saved conditions are clearly marked with how
-          long ago they were updated and are never shown as if they were live.
+          Status is computed live from DriveBC's official Open511 feed. Construction and
+          maintenance advisories are shown but don't restrict the highway — only real lane
+          control or a closure does. Conditions are also saved to your device, so it still
+          opens after you lose signal, always marked with when they were last updated.
         </p>
       </div>
 

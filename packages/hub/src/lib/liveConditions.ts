@@ -66,7 +66,7 @@ async function fetchAllPages(): Promise<RawEvent[]> {
     `${OPEN511_URL}?format=json&status=ACTIVE&bbox=${BBOX.west},${BBOX.south},${BBOX.east},${BBOX.north}&limit=200`;
   let guard = 0;
   while (url && guard++ < 12) {
-    const res = await fetchWithTimeout(url, 8000);
+    const res = await fetchWithTimeout(url, 12000);
     if (!res.ok) throw new Error(`Open511 request failed: ${res.status}`);
     const data = (await res.json()) as { events?: RawEvent[]; pagination?: { next_url?: string | null } };
     events.push(...(data.events ?? []));

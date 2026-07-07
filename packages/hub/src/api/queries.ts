@@ -7,7 +7,6 @@ import {
   fetchHistoryStats,
   fetchIncidents,
   fetchRequests,
-  fetchWebcams,
   type RequestFilter,
 } from "./client.js";
 import type { Incident } from "./types.js";
@@ -34,16 +33,6 @@ export function useIncident(id: string | undefined) {
   });
   const incident: Incident | undefined = query.data?.incidents.find((i) => i.id === id);
   return { ...query, incident };
-}
-
-export function useWebcams() {
-  return useQuery({
-    queryKey: ["webcams"],
-    queryFn: fetchWebcams,
-    refetchInterval: 120_000,
-    retry: 1,
-    staleTime: 60_000,
-  });
 }
 
 /** Public backend health + freshness. Polls briskly so the page feels live. */

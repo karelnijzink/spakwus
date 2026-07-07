@@ -8,7 +8,6 @@ import type {
   CreateRequestRequest,
   HealthReport,
   HistoryStatsResponse,
-  IncidentsResponse,
   NotificationConfig,
   QueueReport,
   SnapshotResponse,
@@ -17,7 +16,6 @@ import type {
   SubmitReportResponse,
   SubscribeRequest,
   SubscribeResponse,
-  WebcamsResponse,
 } from "./types.js";
 
 /**
@@ -60,9 +58,9 @@ export function fetchStatus(): Promise<StatusResponse> {
   return getJson<StatusResponse>("/status");
 }
 
-export function fetchSnapshot(): Promise<SnapshotResponse> {
-  return getJson<SnapshotResponse>("/status/snapshot");
-}
+// Reads come straight from DriveBC's live Open511 feed in the browser, so the
+// site is genuinely live with no backend (and no "service degraded" fallback).
+export { fetchLiveSnapshot as fetchSnapshot, fetchLiveIncidents as fetchIncidents } from "../lib/liveConditions.js";
 
 /**
  * Fetch the CDN static fallback (last-known status) directly — bypasses API_BASE
@@ -108,14 +106,6 @@ export async function fetchHealth(): Promise<HealthReport> {
 
 export function fetchHistoryStats(): Promise<HistoryStatsResponse> {
   return getJson<HistoryStatsResponse>("/history/stats");
-}
-
-export function fetchIncidents(activeOnly = true): Promise<IncidentsResponse> {
-  return getJson<IncidentsResponse>(`/incidents${activeOnly ? "?active=1" : ""}`);
-}
-
-export function fetchWebcams(): Promise<WebcamsResponse> {
-  return getJson<WebcamsResponse>("/webcams");
 }
 
 export class ApiError extends Error {

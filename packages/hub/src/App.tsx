@@ -11,9 +11,9 @@ import { IncidentDetail } from "./pages/IncidentDetail.js";
 import { About } from "./pages/About.js";
 import { Admin } from "./pages/Admin.js";
 import { Community } from "./pages/Community.js";
-import { Alerts } from "./pages/Alerts.js";
 import { Health } from "./pages/Health.js";
 import { History } from "./pages/History.js";
+import { HAS_BACKEND } from "./lib/features.js";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,13 +32,19 @@ const router = createBrowserRouter(
       children: [
         { path: "/", element: <Home /> },
         { path: "/map", element: <MapPage /> },
-        { path: "/community", element: <Community /> },
-        { path: "/alerts", element: <Alerts /> },
         { path: "/incident/:id", element: <IncidentDetail /> },
         { path: "/about", element: <About /> },
-        { path: "/history", element: <History /> },
-        { path: "/health", element: <Health /> },
-        { path: "/admin", element: <Admin /> },
+        // Backend-only routes (community board, moderation, and the
+        // backend-health / history pages) are registered only when a backend is
+        // configured — the static live site omits them.
+        ...(HAS_BACKEND
+          ? [
+              { path: "/community", element: <Community /> },
+              { path: "/history", element: <History /> },
+              { path: "/health", element: <Health /> },
+              { path: "/admin", element: <Admin /> },
+            ]
+          : []),
       ],
     },
   ],

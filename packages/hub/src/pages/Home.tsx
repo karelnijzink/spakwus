@@ -14,6 +14,7 @@ import { CoverageNote } from "../components/CoverageNote.js";
 import { ReportForm } from "../components/ReportForm.js";
 import { PeakRule } from "../components/Decorations.js";
 import { timeAgo } from "../lib/time.js";
+import { HAS_BACKEND } from "../lib/features.js";
 
 const LEVEL_RANK: Record<StatusLevel, number> = { OPEN: 0, PARTIAL: 1, CLOSED: 2 };
 
@@ -70,15 +71,17 @@ export function Home() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <SectionHeading>Along the corridor</SectionHeading>
-          <button
-            type="button"
-            onClick={() => setReporting((v) => !v)}
-            className="rounded-full bg-pine px-3 py-1.5 text-xs font-semibold text-paper"
-          >
-            {reporting ? "Close" : "＋ Report from the road"}
-          </button>
+          {HAS_BACKEND && (
+            <button
+              type="button"
+              onClick={() => setReporting((v) => !v)}
+              className="rounded-full bg-pine px-3 py-1.5 text-xs font-semibold text-paper"
+            >
+              {reporting ? "Close" : "＋ Report from the road"}
+            </button>
+          )}
         </div>
-        {reporting && (
+        {HAS_BACKEND && reporting && (
           <div className="mb-4">
             <ReportForm defaultSegmentId={primary?.segmentId} onDone={() => setReporting(false)} />
           </div>

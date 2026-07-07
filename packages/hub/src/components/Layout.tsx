@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { brand } from "@nissegroup/shared";
 import { useCorridorData } from "../offline/CorridorContext.js";
 import { statusStyle } from "../lib/status.js";
+import { HAS_BACKEND } from "../lib/features.js";
 import { OfflineBanner } from "./OfflineBanner.js";
 import { DegradedBanner } from "./DegradedBanner.js";
 import { ResurfacePrompt } from "./ResurfacePrompt.js";
@@ -52,7 +53,8 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: "/", label: "Home", icon: HomeIcon, end: true },
   { to: "/map", label: "Map", icon: MapIcon },
-  { to: "/community", label: "Community", icon: CommunityIcon },
+  // The community board needs a backend; only show it when one is configured.
+  ...(HAS_BACKEND ? [{ to: "/community", label: "Community", icon: CommunityIcon }] : []),
   { to: "/about", label: "About", icon: AboutIcon },
 ];
 
@@ -74,17 +76,6 @@ function Wordmark() {
         </span>
       </div>
     </Link>
-  );
-}
-
-function AlertsBell() {
-  return (
-    <NavLink to="/alerts" aria-label="Get alerts" className="text-ink-3 transition hover:text-pine">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
-        <path d="M6 9a6 6 0 1112 0c0 4 1.5 5 2 6H4c.5-1 2-2 2-6z" strokeLinejoin="round" />
-        <path d="M10.5 20a1.5 1.5 0 003 0" strokeLinecap="round" />
-      </svg>
-    </NavLink>
   );
 }
 
@@ -122,7 +113,6 @@ function Header() {
               {statusStyle(status).label}
             </span>
           )}
-          <AlertsBell />
         </div>
       </div>
     </header>
@@ -145,18 +135,22 @@ function Footer() {
         <a href={`mailto:${brand.supportEmail}`} className="transition hover:text-ink">
           {brand.supportEmail}
         </a>
-        <span aria-hidden className="mx-1.5">
-          ·
-        </span>
-        <Link to="/history" className="transition hover:text-ink">
-          History
-        </Link>
-        <span aria-hidden className="mx-1.5">
-          ·
-        </span>
-        <Link to="/health" className="transition hover:text-ink">
-          System status
-        </Link>
+        {HAS_BACKEND && (
+          <>
+            <span aria-hidden className="mx-1.5">
+              ·
+            </span>
+            <Link to="/history" className="transition hover:text-ink">
+              History
+            </Link>
+            <span aria-hidden className="mx-1.5">
+              ·
+            </span>
+            <Link to="/health" className="transition hover:text-ink">
+              System status
+            </Link>
+          </>
+        )}
       </p>
     </footer>
   );

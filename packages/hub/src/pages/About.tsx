@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { brand } from "@nissegroup/shared";
 import { DriveBcLink } from "../components/DriveBcLink.js";
 import { PeakRule } from "../components/Decorations.js";
+import { HAS_BACKEND } from "../lib/features.js";
 
 function Heading({ children }: { children: string }) {
   return <h2 className="font-display text-xl text-ink">{children}</h2>;
@@ -20,7 +21,7 @@ export function About() {
       </div>
 
       <p className="text-[15px] leading-relaxed text-ink-2">
-        {brand.productName} is a live conditions hub and community board for the Sea to
+        {brand.productName} is a live conditions hub{HAS_BACKEND ? " and community board" : ""} for the Sea to
         Sky Highway (BC Highway 99) between Horseshoe Bay and Pemberton. It is a product
         of{" "}
         <a
@@ -49,11 +50,10 @@ export function About() {
       <div className="space-y-2">
         <Heading>How status is decided</Heading>
         <p className="text-sm leading-relaxed text-ink-2">
-          Corridor and segment status is derived from official Open511 events and from
-          trusted steward and community reports, using a deterministic rule set. A single
-          unconfirmed report is shown but never on its own closes the highway, and it is
-          always labelled “reported, unconfirmed”. Community board activity never changes
-          the reported status.
+          Corridor and segment status is computed live in your browser from DriveBC's
+          official Open511 event feed, using a deterministic rule set. Construction and
+          maintenance advisories are shown but don't restrict the corridor — only genuine
+          lane control (single-lane / alternating traffic) and full closures do.
         </p>
       </div>
 
@@ -66,20 +66,22 @@ export function About() {
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Heading>Explore more</Heading>
-        <p className="text-sm leading-relaxed text-ink-2">
-          See the{" "}
-          <Link to="/history" className="font-medium text-pine underline decoration-edge underline-offset-2">
-            corridor incident history
-          </Link>{" "}
-          (closures per month, worst segments, typical durations), or check{" "}
-          <Link to="/health" className="font-medium text-pine underline decoration-edge underline-offset-2">
-            system status
-          </Link>{" "}
-          for backend health and data freshness.
-        </p>
-      </div>
+      {HAS_BACKEND && (
+        <div className="space-y-2">
+          <Heading>Explore more</Heading>
+          <p className="text-sm leading-relaxed text-ink-2">
+            See the{" "}
+            <Link to="/history" className="font-medium text-pine underline decoration-edge underline-offset-2">
+              corridor incident history
+            </Link>{" "}
+            (closures per month, worst segments, typical durations), or check{" "}
+            <Link to="/health" className="font-medium text-pine underline decoration-edge underline-offset-2">
+              system status
+            </Link>{" "}
+            for backend health and data freshness.
+          </p>
+        </div>
+      )}
 
       <p className="text-xs text-ink-3">
         Webcam imagery courtesy of DriveBC. Map data © OpenStreetMap contributors.

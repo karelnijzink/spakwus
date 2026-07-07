@@ -61,7 +61,7 @@ function camMarkerEl(label: string): HTMLElement {
 }
 
 function popup(html: string): maplibregl.Popup {
-  return new maplibregl.Popup({ offset: 16, closeButton: false, className: "spk-popup" }).setHTML(
+  return new maplibregl.Popup({ offset: 16, closeButton: true, maxWidth: "300px", className: "spk-popup" }).setHTML(
     `<div style="font-family:'Inter Variable',system-ui,sans-serif;color:#23221e;">${html}</div>`,
   );
 }
@@ -153,19 +153,26 @@ export function CorridorMap({
           ),
         )
         .addTo(map);
+      // MapLibre resets the element's aria-label to "Map marker" on add; restore ours.
+      el.setAttribute("aria-label", `${kindLabel(incident.kind)} — ${incident.status.toLowerCase()}. Open details.`);
       markersRef.current.push(marker);
     }
 
     for (const cam of cams) {
-      const marker = new maplibregl.Marker({ element: camMarkerEl(`Webcam: ${cam.label}`) })
+      const camEl = camMarkerEl(`Webcam: ${cam.label}`);
+      const marker = new maplibregl.Marker({ element: camEl })
         .setLngLat(segmentMidpoint(cam.segmentId))
         .setPopup(
           popup(
-            `<strong style="font-weight:600">${escapeHtml(cam.label)}</strong>` +
+            `<img src="${escapeHtml(cam.url)}" alt="${escapeHtml(cam.label)}" loading="lazy" ` +
+              `onerror="this.style.display='none'" ` +
+              `style="width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block;margin-bottom:6px;background:#e6ece2;" />` +
+              `<strong style="font-weight:600">${escapeHtml(cam.label)}</strong>` +
               `<div style="margin-top:2px;font-size:11px;color:#696558">${cam.capturedAt ? "Captured " + escapeHtml(clockTime(cam.capturedAt)) : "Awaiting capture"} · DriveBC</div>`,
           ),
         )
         .addTo(map);
+      camEl.setAttribute("aria-label", `Webcam: ${cam.label}`);
       markersRef.current.push(marker);
     }
   }, [incidents, cams, navigate]);

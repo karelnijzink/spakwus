@@ -54,7 +54,9 @@ describeDb("public reporting + moderation (integration)", () => {
   });
 
   it("a SINGLE anon report never flips the banner (segment stays OPEN)", async () => {
-    await postReport({ incidentType: "crash", segmentId: SEG, note: "Crash, traffic stopped" });
+    // A lane-blocking crash classifies as single-lane (a restriction); a single
+    // unconfirmed restriction report still leaves the segment OPEN.
+    await postReport({ incidentType: "crash", segmentId: SEG, note: "Crash blocking a lane" });
     const s = await statusOf(SEG);
     expect(s?.status).toBe("OPEN");
     expect(s?.confidence).toBe("unconfirmed");

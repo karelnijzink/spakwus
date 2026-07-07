@@ -144,7 +144,7 @@ describe("deriveStatus — rule 3: single unconfirmed non-steward report", () =>
 });
 
 describe("deriveStatus — rule 4: PARTIAL states", () => {
-  for (const kind of ["single-lane", "alternating", "delay"] as const) {
+  for (const kind of ["single-lane", "alternating"] as const) {
     it(`maps a steward '${kind}' report to PARTIAL`, () => {
       const reports = [report({ id: "r1", kind, isSteward: true, reporterId: "steward-a" })];
       const s = seg(deriveStatus(reports, [], [], NOW));
@@ -153,6 +153,18 @@ describe("deriveStatus — rule 4: PARTIAL states", () => {
       expect(s.confidence).toBe("confirmed");
     });
   }
+
+  it("a 'delay' advisory stays OPEN — routine maintenance never reads as restricted", () => {
+    // Even an official delay event (highest trust) is an advisory, not a restriction.
+    const eventsOfficial = [officialEvent({ id: "e1", kind: "delay" })];
+    expect(seg(deriveStatus([], eventsOfficial, [], NOW)).status).toBe("OPEN");
+    // And two corroborating steward/community delay reports still stay OPEN.
+    const reports = [
+      report({ id: "r1", reporterId: "alice", kind: "delay", isSteward: true }),
+      report({ id: "r2", reporterId: "bob", kind: "delay" }),
+    ];
+    expect(seg(deriveStatus(reports, [], [], NOW)).status).toBe("OPEN");
+  });
 
   it("an official partial event yields PARTIAL with official confidence", () => {
     const events = [officialEvent({ id: "e1", kind: "single-lane" })];
@@ -172,17 +184,17 @@ describe("deriveStatus — rule 4: PARTIAL states", () => {
   });
 
   it("a SINGLE non-steward partial report does NOT flip to PARTIAL (stays OPEN, unconfirmed)", () => {
-    const reports = [report({ id: "r1", reporterId: "alice", kind: "delay" })];
+    const reports = [report({ id: "r1", reporterId: "alice", kind: "single-lane" })];
     const s = seg(deriveStatus(reports, [], [], NOW));
     expect(s.status).toBe("OPEN");
     expect(s.confidence).toBe("unconfirmed");
-    expect(s.incidents[0]!.partialKind).toBe("delay");
+    expect(s.incidents[0]!.partialKind).toBe("single-lane");
   });
 
   it("TWO independent non-steward partial reports corroborate to PARTIAL", () => {
     const reports = [
-      report({ id: "r1", reporterId: "alice", kind: "delay", createdAt: ago(10) }),
-      report({ id: "r2", reporterId: "bob", kind: "delay", createdAt: ago(5) }),
+      report({ id: "r1", reporterId: "alice", kind: "single-lane", createdAt: ago(10) }),
+      report({ id: "r2", reporterId: "bob", kind: "single-lane", createdAt: ago(5) }),
     ];
     const s = seg(deriveStatus(reports, [], [], NOW));
     expect(s.status).toBe("PARTIAL");

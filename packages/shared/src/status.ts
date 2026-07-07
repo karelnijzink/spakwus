@@ -22,7 +22,11 @@ import { SEGMENTS } from "./segments.js";
  */
 export const CORROBORATION_WINDOW_MS = 45 * 60 * 1000; // 45 minutes
 
-const PARTIAL_KINDS = new Set<Report["kind"]>(["single-lane", "alternating", "delay"]);
+// A segment is PARTIAL ("restricted") only for genuine lane control. A plain
+// "delay" (construction / shoulder maintenance advisory) does NOT restrict the
+// corridor — the road stays OPEN and the delay is surfaced as an incident, so
+// routine maintenance never headlines the highway as restricted.
+const PARTIAL_KINDS = new Set<Report["kind"]>(["single-lane", "alternating"]);
 
 /** Rank status levels so the corridor can take the worst across segments. */
 const LEVEL_RANK: Record<StatusLevel, number> = {
@@ -108,7 +112,8 @@ function makeStatus(
  *     in the window; a steward report corroborates alone.
  *  3. A single unconfirmed non-steward report never sets CLOSED — it yields an
  *     `unconfirmed` incident and leaves the segment OPEN.
- *  4. PARTIAL for single-lane / alternating / delay.
+ *  4. PARTIAL for genuine lane control (single-lane / alternating). A plain
+ *     "delay" advisory stays OPEN.
  *  5. Clearing requires official clear, steward clear, or timeout (no active
  *     corroborated incident).
  *  6. A manual steward override always wins and records its reason.

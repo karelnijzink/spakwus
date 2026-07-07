@@ -142,9 +142,10 @@ describeDb("notifications fan-out (integration)", () => {
     await reconcile(ctx, { cause: "baseline", actor: "system" });
     const s1 = spySenders();
     await fan(QUIET_NIGHT, s1.senders);
-    // Two independent community reports corroborate to PARTIAL.
+    // Two independent community reports corroborate to PARTIAL (single-lane is a
+    // genuine restriction; a plain "delay" advisory would stay OPEN).
     for (const who of ["a", "b"]) {
-      await ctx.db.insert(reports).values({ segmentId: SEG, source: "community", kind: "delay", reporterId: who, isSteward: false });
+      await ctx.db.insert(reports).values({ segmentId: SEG, source: "community", kind: "single-lane", reporterId: who, isSteward: false });
     }
     await reconcile(ctx, { cause: "test", actor: "test" });
     await fan(QUIET_NIGHT, s1.senders);

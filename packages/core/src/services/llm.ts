@@ -59,7 +59,10 @@ export const stubLlmExtractor: LlmExtractor = {
     } else if (/\balternat/.test(text)) {
       kind = "alternating";
       severity = "moderate";
-    } else if (/\b(single lane|one lane|lane closed|some lanes)\b/.test(text)) {
+    } else if (
+      /\b(single lane|one lane|lane closed|lane blocked|some lanes)\b/.test(text) ||
+      /\bblock(?:ing|ed|s)?\s+(?:a\s+|the\s+|one\s+)?lane\b/.test(text)
+    ) {
       kind = "single-lane";
       severity = "moderate";
     } else if (/\b(delay|backed up|congestion|slow|stop and go)\b/.test(text)) {

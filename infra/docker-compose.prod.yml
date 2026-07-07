@@ -1,0 +1,100 @@
+# Copyright Nisse Group Ltd
+# All-in-one single-VPS deployment for Spakwus: Postgres + PostGIS, Redis, the
+# @nissegroup/core backend, and Caddy serving the static hub + the CDN-style
+# static fallback, and reverse-proxying /api to core.
+#
+# Run from the repo root:
+#   pnpm install && pnpm build:hub          # produce packages/hub/dist
+#   cp infra/.env.prod.example infra/.env.prod && edit it
+#   docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d --build
+#
+# Caddy terminates TLS automatically for the domain in SPAKWUS_DOMAIN.
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spakwus
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: spakwus
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spakwus -d spakwus"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "no"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  core:
+    build:
+      context: ..
+      dockerfile: packages/core/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://spakwus:${POSTGRES_PASSWORD}@postgres:5432/spakwus
+      REDIS_URL: redis://redis:6379
+      ENABLE_WORKERS: "true"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      PUBLIC_BASE_URL: https://${SPAKWUS_DOMAIN:?set SPAKWUS_DOMAIN}
+      STEWARD_TOKENS: ${STEWARD_TOKENS:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Write the fallback to a shared volume that Caddy serves at /status-fallback.json.
+      SNAPSHOT_PUBLISH: "file"
+      SNAPSHOT_FILE: /fallback/status-fallback.json
+      # Notification + operator-alert channels (all optional).
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHANNEL_ID: ${TELEGRAM_CHANNEL_ID:-}
+      OPERATOR_WEBHOOK_URL: ${OPERATOR_WEBHOOK_URL:-}
+      OPERATOR_EMAIL: ${OPERATOR_EMAIL:-}
+    volumes:
+      - fallback:/fallback
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - core
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SPAKWUS_DOMAIN: ${SPAKWUS_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../packages/hub/dist:/srv/hub:ro
+      - fallback:/srv/fallback:ro
+      - caddydata:/data
+      - caddyconfig:/config
+
+volumes:
+  pgdata:
+  redisdata:
+  fallback:
+  caddydata:
+  caddyconfig:

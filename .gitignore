@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+**/dist/
+**/dev-dist/
+build/
+coverage/
+*.tsbuildinfo
+**/*.tsbuildinfo
+.vite/
+
+# Secrets / local env (all *.example files are kept)
+.env
+**/.env
+.env.local
+**/.env.local
+.env.*.local
+infra/.env.prod
+!**/*.example
+
+# Runtime artifact written by the core snapshot publisher (the hub bakes its own).
+packages/core/public/status-fallback.json
+
+# Editor / OS
+.DS_Store
+pnpm-debug.log*
+*.log

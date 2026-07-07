@@ -1,0 +1,64 @@
+/* Copyright Nisse Group Ltd */
+/* SPDX-License-Identifier: LicenseRef-TBD (see LICENSE decision note in README) */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Spakwus visual identity — inherited from the Nisse Group house style:
+ * warm cream paper, deep pine-green accent, clean sans (Inter) throughout.
+ */
+:root {
+  --paper: #f3efe5;
+  --paper-raised: #fbf9f3;
+  --edge: #e4ddce;
+  --ink: #23221e;
+  --ink-2: #56534a;
+  --ink-3: #8b877a;
+
+  /* Brand accent is overwritten at runtime from @nissegroup/shared brand.colors.primary. */
+  --brand-primary: #2e4a38;
+  --brand-secondary: #a0392a;
+  --brand-theme: #2e4a38;
+
+  /* Status palette — refined, cohesive with the cream/pine system. */
+  --open: #2f5d46;
+  --open-bg: #e6ece2;
+  --partial: #97671b;
+  --partial-bg: #f2e8cf;
+  --closed: #a0392a;
+  --closed-bg: #f0ddd5;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink-2);
+  font-family: "Inter Variable", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: "Inter Variable", system-ui, sans-serif;
+  color: var(--ink);
+}
+
+.maplibregl-map {
+  font-family: "Inter Variable", system-ui, sans-serif;
+}
+
+/* Subtle paper grain / warmth without an external asset. */
+.paper-grain {
+  background-image: radial-gradient(rgba(35, 34, 30, 0.02) 1px, transparent 1px);
+  background-size: 4px 4px;
+}

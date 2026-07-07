@@ -1,0 +1,71 @@
+# Copyright Nisse Group Ltd
+# Build the @nissegroup/hub PWA and publish it to GitHub Pages.
+#
+# Note: GitHub Pages is static-only. The hub is deployed as a UI with a baked-in
+# last-known status snapshot (public/status-fallback.json) and live DriveBC cams
+# (loaded directly from DriveBC). Features that need the @nissegroup/core backend
+# (incidents, community board, alerts, reporting) degrade gracefully — see the
+# deploy notes in infra/RUNBOOK.md for hosting the backend.
+
+name: Deploy hub to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; newer pushes cancel in-progress runs.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build shared
+        run: pnpm --filter @nissegroup/shared run build
+
+      - name: Build hub (under the /spakwus/ base path)
+        run: pnpm --filter @nissegroup/hub run build
+        env:
+          VITE_BASE: /spakwus/
+
+      - name: SPA fallback for deep links
+        # GitHub Pages has no server-side rewrites; serving the app shell as
+        # 404.html lets client-side routes (e.g. /spakwus/map) load correctly.
+        run: cp packages/hub/dist/index.html packages/hub/dist/404.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/hub/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,53 @@
+# Copyright Nisse Group Ltd
+# Local dev infrastructure for @nissegroup/core: Postgres 16 + PostGIS and Redis.
+# Software only — no hardware, mesh, LoRa, or MQTT.
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: spakwus-postgres
+    environment:
+      POSTGRES_USER: spakwus
+      POSTGRES_PASSWORD: spakwus
+      POSTGRES_DB: spakwus
+    ports:
+      - "5432:5432"
+    volumes:
+      - spakwus-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spakwus -d spakwus"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Separate database used by the integration test suite (TEST_DATABASE_URL).
+  postgres-test:
+    image: postgis/postgis:16-3.4
+    container_name: spakwus-postgres-test
+    environment:
+      POSTGRES_USER: spakwus
+      POSTGRES_PASSWORD: spakwus
+      POSTGRES_DB: spakwus_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spakwus -d spakwus_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: spakwus-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  spakwus-pgdata:

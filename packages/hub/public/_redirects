@@ -1,0 +1,5 @@
+# Copyright Nisse Group Ltd
+# SPA fallback for Netlify / Cloudflare Pages. Real files (assets, the static
+# status fallback) are served directly; everything else serves the app shell.
+/status-fallback.json  /status-fallback.json  200
+/*                     /index.html            200

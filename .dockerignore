@@ -1,0 +1,13 @@
+# Copyright Nisse Group Ltd
+**/node_modules
+**/dist
+**/dev-dist
+**/.tsbuildinfo
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+packages/hub/dist
+packages/core/public/status-fallback.json
+.git
+.github
+*.log

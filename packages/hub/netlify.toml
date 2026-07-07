@@ -1,0 +1,28 @@
+# Copyright Nisse Group Ltd
+# Netlify / Cloudflare Pages deploy config for the Spakwus hub (static PWA).
+# Build from the repo root so the workspace + @nissegroup/shared resolve.
+
+[build]
+  base = "/"
+  command = "pnpm install --frozen-lockfile && pnpm build:shared && pnpm --filter @nissegroup/hub build"
+  publish = "packages/hub/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # The core API lives on its own host (e.g. Fly). Point the hub at it.
+  VITE_API_BASE = "https://spakwus-core.fly.dev/api"
+  # The static fallback is served from this same static host at the site root.
+  VITE_STATIC_FALLBACK_URL = "/status-fallback.json"
+
+# The backend PUTs the fallback here (SNAPSHOT_HTTP_URL) so it survives an API
+# outage. Keep it uncached-ish so a fresh publish is seen quickly.
+[[headers]]
+  for = "/status-fallback.json"
+  [headers.values]
+    Cache-Control = "public, max-age=30"
+
+# SPA routing: every non-file path serves the app shell.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

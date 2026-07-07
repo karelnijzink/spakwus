@@ -1,0 +1,10 @@
+<!-- Copyright Nisse Group Ltd -->
+<!-- Spakwus mark — Sea to Sky peaks over the highway, in the brand pine/cream palette. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Spakwus mark">
+  <rect width="512" height="512" rx="96" fill="#2e4a38" />
+  <path d="M96 340 L200 190 L268 286 L330 150 L416 340 Z" fill="#f3efe5" opacity="0.96" />
+  <rect x="96" y="352" width="320" height="28" rx="14" fill="#f3efe5" />
+  <rect x="150" y="360" width="40" height="12" rx="6" fill="#2e4a38" />
+  <rect x="236" y="360" width="40" height="12" rx="6" fill="#2e4a38" />
+  <rect x="322" y="360" width="40" height="12" rx="6" fill="#2e4a38" />
+</svg>

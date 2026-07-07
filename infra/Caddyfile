@@ -1,0 +1,34 @@
+# Copyright Nisse Group Ltd
+# Caddy serves the static Spakwus hub, the CDN-style static fallback, and
+# reverse-proxies the API to the core backend. TLS is provisioned automatically.
+
+{$SPAKWUS_DOMAIN} {
+	encode gzip zstd
+
+	# API → core backend.
+	handle /api/* {
+		reverse_proxy core:3000
+	}
+
+	# Liveness passthrough (handy for external uptime monitors).
+	handle /health {
+		reverse_proxy core:3000
+	}
+
+	# The static last-known-status fallback, written by core to the shared volume.
+	# Served independently of the backend so it survives a core outage. Short cache
+	# so a fresh publish is picked up quickly.
+	handle /status-fallback.json {
+		root * /srv/fallback
+		header Cache-Control "public, max-age=30"
+		file_server
+	}
+
+	# Static hub (SPA): serve built assets, fall back to index.html for routes.
+	handle {
+		root * /srv/hub
+		encode gzip
+		try_files {path} /index.html
+		file_server
+	}
+}

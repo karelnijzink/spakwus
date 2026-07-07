@@ -1,0 +1,49 @@
+# Copyright Nisse Group Ltd
+# Fly.io config for @nissegroup/core (the Spakwus backend).
+# Deploy from the repo root:  fly deploy
+# The build context is this directory (the pnpm workspace), which the Dockerfile
+# requires. See infra/RUNBOOK.md for first-time setup (Postgres, Redis, secrets).
+
+app = "spakwus-core"
+primary_region = "sea" # Seattle — nearest region to the Sea to Sky corridor
+
+[build]
+  dockerfile = "packages/core/Dockerfile"
+
+[env]
+  HOST = "0.0.0.0"
+  PORT = "3000"
+  ENABLE_WORKERS = "true"
+  LOG_LEVEL = "info"
+  # Push the static fallback to the hub's CDN so it survives a backend outage.
+  # Set SNAPSHOT_HTTP_URL (+ SNAPSHOT_HTTP_TOKEN) as secrets, or switch to
+  # SNAPSHOT_PUBLISH="file" and mount the volume below at /app/public.
+  SNAPSHOT_PUBLISH = "http"
+  PUBLIC_BASE_URL = "https://spakwus.ca"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  # Workers (poller, notifier, snapshot publisher) must run continuously, so the
+  # machine must not auto-stop when idle of HTTP traffic.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "3s"
+    grace_period = "20s"
+    method = "GET"
+    path = "/health"
+
+# Optional: durable disk for SNAPSHOT_PUBLISH="file". Create with:
+#   fly volumes create spakwus_data --size 1 --region sea
+# then uncomment:
+# [mounts]
+#   source = "spakwus_data"
+#   destination = "/app/public"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

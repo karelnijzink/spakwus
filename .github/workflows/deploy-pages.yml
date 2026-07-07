@@ -12,6 +12,12 @@ name: Deploy hub to GitHub Pages
 on:
   push:
     branches: [main]
+  # Redeploy every 30 min to refresh the live status fallback (the cold-start
+  # backstop) from Open511, so it's never stale. Only status-fallback.json
+  # changes between scheduled runs, so the app bundle / service worker are
+  # untouched and users aren't disrupted. (Actions are free on public repos.)
+  schedule:
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -19,10 +25,11 @@ permissions:
   pages: write
   id-token: write
 
-# Allow one concurrent deployment; newer pushes cancel in-progress runs.
+# Don't cancel an in-progress deploy (a scheduled refresh shouldn't abort a push
+# deploy); let them queue instead.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -42,6 +49,11 @@ jobs:
 
       - name: Build shared
         run: pnpm --filter @nissegroup/shared run build
+
+      - name: Refresh live status fallback (from Open511)
+        # Best-effort; the script exits 0 even if Open511 is unreachable so a
+        # transient upstream outage never fails the deploy.
+        run: node packages/hub/scripts/refresh-fallback.mjs
 
       - name: Build hub (under the /spakwus/ base path)
         run: pnpm --filter @nissegroup/hub run build

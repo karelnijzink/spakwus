@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-TBD (see LICENSE decision note in README)
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { fetchSnapshot, fetchStaticFallback } from "../api/client.js";
 import type { SnapshotResponse } from "../api/types.js";
 import { loadSnapshot, saveSnapshot, type StoredSnapshot } from "./snapshotStore.js";
@@ -67,10 +67,15 @@ export function useCorridor(): CorridorView {
   const live = useQuery({
     queryKey: ["snapshot"],
     queryFn: fetchSnapshot,
-    refetchInterval: 60_000,
+    refetchInterval: 45_000,
     refetchOnWindowFocus: true,
-    retry: 1,
+    refetchOnReconnect: true,
+    retry: 3,
+    retryDelay: (n) => Math.min(1000 * 2 ** n, 8000),
     staleTime: 30_000,
+    // Keep the last good snapshot on screen through refetches/errors — the feed
+    // never flashes empty or "degraded" during a transient blip.
+    placeholderData: keepPreviousData,
   });
 
   const liveFailed = !live.data && (live.isError || (live.isFetched && !live.isSuccess));
@@ -81,8 +86,9 @@ export function useCorridor(): CorridorView {
     queryFn: fetchStaticFallback,
     enabled: liveFailed,
     refetchInterval: liveFailed ? 60_000 : false,
-    retry: 1,
+    retry: 2,
     staleTime: 30_000,
+    placeholderData: keepPreviousData,
   });
 
   // Persist whichever real snapshot we got so the device cache is always warm.

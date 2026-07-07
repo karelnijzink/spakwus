@@ -1,7 +1,7 @@
 // Copyright Nisse Group Ltd
 // SPDX-License-Identifier: LicenseRef-TBD (see LICENSE decision note in README)
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   fetchHealth,
   fetchHistoryStats,
@@ -11,14 +11,17 @@ import {
 } from "./client.js";
 import type { Incident } from "./types.js";
 
-/** Active incidents with their reports. Best-effort — empty/undefined offline. */
+/** Active incidents (live from Open511). Keeps last-good data through blips. */
 export function useIncidents(activeOnly = true) {
   return useQuery({
     queryKey: ["incidents", { activeOnly }],
     queryFn: () => fetchIncidents(activeOnly),
-    refetchInterval: 60_000,
-    retry: 1,
+    refetchInterval: 45_000,
+    refetchOnReconnect: true,
+    retry: 3,
+    retryDelay: (n) => Math.min(1000 * 2 ** n, 8000),
     staleTime: 30_000,
+    placeholderData: keepPreviousData,
   });
 }
 

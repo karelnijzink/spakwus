@@ -45,24 +45,55 @@ interface RawEvent {
   updated?: string;
 }
 
-// A tiny module cache so the snapshot + incidents queries share one fetch.
+// A tiny module cache — dedupes the snapshot + incidents queries onto one fetch,
+// and doubles as the "last known good" so a transient Open511 blip can't take the
+// feed down once it has loaded at least once.
 let cache: { at: number; events: RawEvent[] } | null = null;
 
-async function fetchEvents(): Promise<RawEvent[]> {
-  if (cache && Date.now() - cache.at < 30_000) return cache.events;
+async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { headers: { accept: "application/json" }, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchAllPages(): Promise<RawEvent[]> {
   const events: RawEvent[] = [];
   let url: string | null =
     `${OPEN511_URL}?format=json&status=ACTIVE&bbox=${BBOX.west},${BBOX.south},${BBOX.east},${BBOX.north}&limit=200`;
   let guard = 0;
   while (url && guard++ < 12) {
-    const res = await fetch(url, { headers: { accept: "application/json" } });
+    const res = await fetchWithTimeout(url, 8000);
     if (!res.ok) throw new Error(`Open511 request failed: ${res.status}`);
     const data = (await res.json()) as { events?: RawEvent[]; pagination?: { next_url?: string | null } };
     events.push(...(data.events ?? []));
     url = data.pagination?.next_url ?? null;
   }
-  cache = { at: Date.now(), events };
   return events;
+}
+
+async function fetchEvents(): Promise<RawEvent[]> {
+  if (cache && Date.now() - cache.at < 25_000) return cache.events;
+  // Two attempts with a short backoff; if both fail, serve the last-known events
+  // rather than failing the feed. Only a cold failure (never loaded) throws, and
+  // then the UI's own offline fallback takes over.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const events = await fetchAllPages();
+      cache = { at: Date.now(), events };
+      return events;
+    } catch (err) {
+      if (attempt === 1) {
+        if (cache) return cache.events;
+        throw err;
+      }
+      await new Promise((r) => setTimeout(r, 600));
+    }
+  }
+  return cache?.events ?? [];
 }
 
 /** First [lon, lat] of a Point / LineString / MultiLineString geography. */
@@ -177,7 +208,7 @@ export async function fetchLiveSnapshot(): Promise<SnapshotResponse> {
 
   const corridor = deriveStatus([], official, [], now);
   const worst = corridor.segments.find((s) => s.status === corridor.status);
-  const camBust = Math.floor(now.getTime() / 120_000); // stable for 2 min
+  const camBust = Math.floor(now.getTime() / 60_000); // refresh cam stills each minute
 
   return {
     source: "open511",

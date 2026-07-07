@@ -12,6 +12,7 @@ import { IncidentCard } from "../components/IncidentCard.js";
 import { WebcamThumb } from "../components/WebcamThumb.js";
 import { CoverageNote } from "../components/CoverageNote.js";
 import { ReportForm } from "../components/ReportForm.js";
+import { ShareReport } from "../components/ShareReport.js";
 import { PeakRule } from "../components/Decorations.js";
 import { timeAgo } from "../lib/time.js";
 import { HAS_BACKEND } from "../lib/features.js";
@@ -71,19 +72,21 @@ export function Home() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <SectionHeading>Along the corridor</SectionHeading>
-          {HAS_BACKEND && (
-            <button
-              type="button"
-              onClick={() => setReporting((v) => !v)}
-              className="rounded-full bg-pine px-3 py-1.5 text-xs font-semibold text-paper"
-            >
-              {reporting ? "Close" : "＋ Report from the road"}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setReporting((v) => !v)}
+            className="rounded-full bg-pine px-3 py-1.5 text-xs font-semibold text-paper"
+          >
+            {reporting ? "Close" : "＋ Report from the road"}
+          </button>
         </div>
-        {HAS_BACKEND && reporting && (
+        {reporting && (
           <div className="mb-4">
-            <ReportForm defaultSegmentId={primary?.segmentId} onDone={() => setReporting(false)} />
+            {HAS_BACKEND ? (
+              <ReportForm defaultSegmentId={primary?.segmentId} onDone={() => setReporting(false)} />
+            ) : (
+              <ShareReport defaultSegmentId={primary?.segmentId} onDone={() => setReporting(false)} />
+            )}
           </div>
         )}
         <SegmentStrip segments={snapshot.segments} />

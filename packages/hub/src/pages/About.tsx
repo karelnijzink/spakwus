@@ -35,6 +35,34 @@ export function About() {
         .
       </p>
 
+      <div className="space-y-2">
+        <Heading>The name</Heading>
+        <p className="text-sm leading-relaxed text-ink-2">
+          Spakwus is the Sḵwx̱wú7mesh (Squamish) word for eagle, from the language of the
+          Nation whose territory the Sea to Sky corridor and Howe Sound have belonged to
+          since time immemorial. We chose it because the eagle is exactly what this project
+          is: a watcher from above, keeping an eye on the corridor and looking out for the
+          people traveling through it.
+        </p>
+        <p className="text-sm leading-relaxed text-ink-2">
+          The name is rooted in this specific place. This stretch of coast, especially
+          Brackendale, is world famous for its gathering eagles, and the eagle is a being the
+          Squamish Nation uses to represent itself — from the Spakwus Slolem (Eagle Song
+          Dancers) to the naming of community institutions. It is local, it is alive, and it
+          carries the idea of protection and sharp sight that sits at the heart of what we are
+          building.
+        </p>
+        <p className="text-sm leading-relaxed text-ink-2">
+          Spakwus was created to solve a real problem. Today, when the Sea to Sky Highway
+          closes after a crash or a slide, the fastest reliable information comes from a
+          volunteer Facebook group, and the people best placed to report an incident are often
+          stuck in cell dead zones with no way to get the word out. Spakwus is a community-run
+          network of nodes and a live conditions hub that gets accurate information moving
+          quickly, so drivers know before they commit to the road, and so no one is left
+          sitting in the dark waiting to find out what happened ahead.
+        </p>
+      </div>
+
       <div className="rounded-2xl border border-closed/20 bg-closed-bg/60 p-5">
         <p className="font-display text-lg text-closed">This is not an official ruling.</p>
         <p className="mt-1.5 text-sm leading-relaxed text-ink-2">

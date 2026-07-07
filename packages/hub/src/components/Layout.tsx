@@ -7,6 +7,7 @@ import { brand } from "@nissegroup/shared";
 import { useCorridorData } from "../offline/CorridorContext.js";
 import { statusStyle } from "../lib/status.js";
 import { HAS_BACKEND } from "../lib/features.js";
+import { Logo } from "./Logo.js";
 import { OfflineBanner } from "./OfflineBanner.js";
 import { DegradedBanner } from "./DegradedBanner.js";
 import { ResurfacePrompt } from "./ResurfacePrompt.js";
@@ -61,14 +62,8 @@ const NAV: NavItem[] = [
 function Wordmark() {
   return (
     <Link to="/" className="flex items-center gap-2.5">
-      {/* The Spakwus mark (brand logo). Resolve against the Vite base so it loads
-          under a subpath deploy (e.g. GitHub Pages at /spakwus/). */}
-      <img
-        src={`${import.meta.env.BASE_URL}${brand.logoPath.replace(/^\//, "")}`}
-        alt=""
-        aria-hidden
-        className="h-8 w-8 rounded-lg"
-      />
+      {/* The Spakwus mark, inlined (see Logo) so it never 404s or serves stale. */}
+      <Logo className="h-8 w-8 rounded-lg" />
       <div className="flex items-baseline gap-2.5">
         <span className="text-xl font-bold tracking-tight text-ink">{brand.productName}</span>
         <span className="hidden pb-0.5 text-[10px] uppercase tracking-eyebrow text-ink-3 sm:inline">

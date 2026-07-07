@@ -25,6 +25,12 @@ const authHeaders = { apikey: SUPABASE_KEY, authorization: `Bearer ${SUPABASE_KE
 /** Whether a community store is configured (so the board can be shown). */
 export const COMMUNITY_ENABLED = Boolean(SUPABASE_URL && SUPABASE_KEY);
 
+export interface CommunityReply {
+  id: string;
+  body: string;
+  created_at: string;
+}
+
 export interface CommunityPost {
   id: string;
   kind: RequestKind;
@@ -35,6 +41,11 @@ export interface CommunityPost {
   contact_value: string | null;
   created_at: string;
   expires_at: string;
+  replies: CommunityReply[];
+}
+
+interface PostRow extends Omit<CommunityPost, "replies"> {
+  spakwus_community_replies: CommunityReply[] | null;
 }
 
 export interface NewPost {
@@ -46,11 +57,33 @@ export interface NewPost {
   contactValue?: string;
 }
 
-/** Open (non-expired) posts, newest first. RLS filters out expired rows. */
+/** Open (non-expired) posts with their replies embedded, newest first. */
 export async function fetchPosts(): Promise<CommunityPost[]> {
-  const res = await fetch(`${REST}?select=*&order=created_at.desc&limit=200`, { headers: authHeaders });
+  const select = "*,spakwus_community_replies(id,body,created_at)";
+  const res = await fetch(`${REST}?select=${encodeURIComponent(select)}&order=created_at.desc&limit=200`, {
+    headers: authHeaders,
+  });
   if (!res.ok) throw new Error(`Community read failed: ${res.status}`);
-  return (await res.json()) as CommunityPost[];
+  const rows = (await res.json()) as PostRow[];
+  return rows.map(({ spakwus_community_replies, ...post }) => ({
+    ...post,
+    replies: (spakwus_community_replies ?? []).sort((a, b) => a.created_at.localeCompare(b.created_at)),
+  }));
+}
+
+const REPLIES = `${SUPABASE_URL}/rest/v1/spakwus_community_replies`;
+
+/** Reply to an open post. RLS enforces the parent post exists and is open. */
+export async function createReply(postId: string, body: string): Promise<void> {
+  const res = await fetch(REPLIES, {
+    method: "POST",
+    headers: { ...authHeaders, "content-type": "application/json", prefer: "return=minimal" },
+    body: JSON.stringify({ post_id: postId, body: body.trim() }),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Reply failed (${res.status}) ${detail}`.trim());
+  }
 }
 
 /** Create a post. Server-side RLS/constraints enforce the fields + 48h window. */

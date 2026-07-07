@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { brand } from "@nissegroup/shared";
 import { DriveBcLink } from "../components/DriveBcLink.js";
 import { PeakRule } from "../components/Decorations.js";
-import { HAS_BACKEND } from "../lib/features.js";
+import { HAS_BACKEND, HAS_COMMUNITY } from "../lib/features.js";
 
 function Heading({ children }: { children: string }) {
   return <h2 className="font-display text-xl text-ink">{children}</h2>;
@@ -21,7 +21,7 @@ export function About() {
       </div>
 
       <p className="text-[15px] leading-relaxed text-ink-2">
-        {brand.productName} is a live conditions hub{HAS_BACKEND ? " and community board" : ""} for the Sea to
+        {brand.productName} is a live conditions hub{HAS_COMMUNITY ? " and community board" : ""} for the Sea to
         Sky Highway (BC Highway 99) between Horseshoe Bay and Pemberton. It is a product
         of{" "}
         <a

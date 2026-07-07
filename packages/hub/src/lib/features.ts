@@ -10,3 +10,7 @@
  * configured at build time via VITE_API_BASE.
  */
 export const HAS_BACKEND = Boolean(import.meta.env.VITE_API_BASE);
+
+// The community board runs on a Supabase table read/written from the browser, so
+// it works with no core backend. Shown whenever that store is configured.
+export { COMMUNITY_ENABLED as HAS_COMMUNITY } from "./supabaseCommunity.js";

@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { brand } from "@nissegroup/shared";
 import { useCorridorData } from "../offline/CorridorContext.js";
 import { statusStyle } from "../lib/status.js";
-import { HAS_BACKEND } from "../lib/features.js";
+import { HAS_BACKEND, HAS_COMMUNITY } from "../lib/features.js";
 import { Logo } from "./Logo.js";
 import { OfflineBanner } from "./OfflineBanner.js";
 import { DegradedBanner } from "./DegradedBanner.js";
@@ -54,8 +54,8 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: "/", label: "Home", icon: HomeIcon, end: true },
   { to: "/map", label: "Map", icon: MapIcon },
-  // The community board needs a backend; only show it when one is configured.
-  ...(HAS_BACKEND ? [{ to: "/community", label: "Community", icon: CommunityIcon }] : []),
+  // The community board runs on Supabase (browser-side) — show it when configured.
+  ...(HAS_COMMUNITY ? [{ to: "/community", label: "Community", icon: CommunityIcon }] : []),
   { to: "/about", label: "About", icon: AboutIcon },
 ];
 

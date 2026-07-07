@@ -13,7 +13,7 @@ import { Admin } from "./pages/Admin.js";
 import { Community } from "./pages/Community.js";
 import { Health } from "./pages/Health.js";
 import { History } from "./pages/History.js";
-import { HAS_BACKEND } from "./lib/features.js";
+import { HAS_BACKEND, HAS_COMMUNITY } from "./lib/features.js";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,12 +34,12 @@ const router = createBrowserRouter(
         { path: "/map", element: <MapPage /> },
         { path: "/incident/:id", element: <IncidentDetail /> },
         { path: "/about", element: <About /> },
-        // Backend-only routes (community board, moderation, and the
-        // backend-health / history pages) are registered only when a backend is
-        // configured — the static live site omits them.
+        // The community board runs on Supabase (browser-side), so it's available
+        // whenever a store is configured — independent of the core backend.
+        ...(HAS_COMMUNITY ? [{ path: "/community", element: <Community /> }] : []),
+        // Moderation + the backend-health / history pages need the core backend.
         ...(HAS_BACKEND
           ? [
-              { path: "/community", element: <Community /> },
               { path: "/history", element: <History /> },
               { path: "/health", element: <Health /> },
               { path: "/admin", element: <Admin /> },

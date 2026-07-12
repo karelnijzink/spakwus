@@ -39,7 +39,8 @@ export function MapPage() {
       </div>
       <p className="text-xs text-ink-3">
         Incident markers show live-reported conditions; camera markers are placed at
-        approximate segment locations. Confirm with <DriveBcLink className="text-ink-2" />.
+        approximate segment locations; the diamond markers are points of interest along
+        the way. Confirm with <DriveBcLink className="text-ink-2" />.
       </p>
     </div>
   );

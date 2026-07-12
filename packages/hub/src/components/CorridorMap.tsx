@@ -7,6 +7,7 @@ import maplibregl, { type StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Incident, SnapshotWebcam } from "../api/types.js";
 import { CORRIDOR_LINE, corridorBounds, segmentMidpoint } from "../lib/corridorGeo.js";
+import { LANDMARKS } from "../lib/landmarks.js";
 import { kindLabel } from "../lib/status.js";
 import { clockTime } from "../lib/time.js";
 
@@ -32,6 +33,7 @@ const STATUS_COLOR: Record<Incident["status"], string> = {
 
 const PINE = "#2e4a38";
 const PAPER = "#f3efe5";
+const TERRACOTTA = "#a0392a";
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -57,6 +59,21 @@ function camMarkerEl(label: string): HTMLElement {
     cursor:pointer;padding:0;background:${PINE};`;
   el.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${PAPER}" stroke-width="2">
     <path d="M4 8h3l1.5-2h7L17 8h3v11H4z" stroke-linejoin="round"/><circle cx="12" cy="13" r="3"/></svg>`;
+  return el;
+}
+
+/** A landmark marker: a terracotta diamond with a small flag glyph — distinct
+ * from cameras (pine squares, live feeds) and incidents (status-coloured
+ * dots, live conditions). Fixed points of interest, not live data. */
+function landmarkMarkerEl(label: string): HTMLElement {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.setAttribute("aria-label", label);
+  el.style.cssText = `display:flex;align-items:center;justify-content:center;width:22px;height:22px;
+    border-radius:6px;border:2px solid ${PAPER};box-shadow:0 1px 4px rgba(35,34,30,.4);
+    cursor:pointer;padding:0;background:${TERRACOTTA};transform:rotate(45deg);`;
+  el.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${PAPER}" stroke-width="2.2" style="transform:rotate(-45deg)">
+    <path d="M5 3v18" stroke-linecap="round"/><path d="M5 4h11l-3 4 3 4H5" stroke-linejoin="round"/></svg>`;
   return el;
 }
 
@@ -173,6 +190,24 @@ export function CorridorMap({
         )
         .addTo(map);
       camEl.setAttribute("aria-label", `Webcam: ${cam.label}`);
+      markersRef.current.push(marker);
+    }
+
+    for (const landmark of LANDMARKS) {
+      const landmarkEl = landmarkMarkerEl(`Point of interest: ${landmark.name}`);
+      const marker = new maplibregl.Marker({ element: landmarkEl })
+        .setLngLat([landmark.lon, landmark.lat])
+        .setPopup(
+          popup(
+            `<strong style="font-weight:600">${escapeHtml(landmark.name)}</strong>` +
+              `<div style="margin-top:2px;font-size:12px;color:#56534a">${escapeHtml(landmark.description)}</div>` +
+              (landmark.url
+                ? `<a href="${escapeHtml(landmark.url)}" target="_blank" rel="noreferrer" style="display:inline-block;margin-top:6px;font-size:11px;color:${TERRACOTTA};text-decoration:underline;">Learn more →</a>`
+                : ""),
+          ),
+        )
+        .addTo(map);
+      landmarkEl.setAttribute("aria-label", `Point of interest: ${landmark.name}`);
       markersRef.current.push(marker);
     }
   }, [incidents, cams, navigate]);
